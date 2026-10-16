@@ -1,7 +1,7 @@
 # Análisis — Tarea 1
 
 **Integrantes:**
-1.
+1. Arteaga Sánchez Danhé
 2.
 3.
 
@@ -19,10 +19,10 @@
 
 | Componente | Qué recibe | Qué entrega | De qué es responsable |
 |---|---|---|---|
-| `lexer` | | | |
-| `parser` | | | |
-| `ast` | | | |
-| `evaluator` | | | |
+| `lexer` | Cadena de texto con la expresión aritmética. | Una lista de objetos tipo Token que tienen su nombre, valor y posición dentro de la expresión. | Se encarga de hacer el análisis sintático, reconociendo cada token como un número, operador binario o hasta un paréntesis. |
+| `parser` | Lista de tokens generada por el lexer. | Crea la estructura para el AST. | Se encarga de hacer el análisis sintático para revisar que los tokens recibidos respeten las reglas de la expresión aritmética, así como la prescedencia de operaciones. |
+| `ast` | Recibe la construcción del árbol hecha por el parser. | Entrega una cadena de texto con la reppresentación del árbol AST de la expresión aritmética. | Crea nodos con los números y las operaciones binarias, leyende de izquierda a derecha la expresión aritmética para representarla correctamente. |
+| `evaluator` | Recibe un nodo del AST. | El valor resultante del nodo. | Se encarga de que la semántica sea la correcta y si es así resuelve las operaciones de cada nodo para al final regresar el resultado numérico de la expresión aritmética. |
 
 ### 1.2 ¿Qué recorrido sigue una expresión desde que se recibe como texto hasta que produce un resultado?
 
