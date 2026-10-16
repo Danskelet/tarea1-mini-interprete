@@ -1,9 +1,9 @@
 # Análisis — Tarea 1
 
 **Integrantes:**
-1. Arteaga Sánchez Danhé
-2.
-3.
+1. Arteaga Sánchez Danhé Mahetsi
+2. Sánchez Segura Luis Yamil Antonio
+3. Sosa Aranda Miguel
 
 **Fork:**
 **Rama:**
