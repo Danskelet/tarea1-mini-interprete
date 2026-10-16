@@ -31,17 +31,16 @@
 | Etapa | Cómo se ve `(3 + 4) * 2` aquí |
 |---|---|
 | texto | `"(3 + 4) * 2"` |
-| tokens | [NUMERO(3), MAS, NUMERO(4), POR, NUMERO(2)] |
+| tokens | [PAR_IZQ, NUMERO(3), MAS, NUMERO(4), PAR_DER, POR, NUMERO(2)] |
 | AST | 
-
 ```text
 *
 |-- +
 |   |-- 3
 |   `-- 4
 `-- 2
-
 ```
+|
 | resultado | 14 |
 
 > Para el renglón del AST, dibújenlo **primero ustedes** y después comprueben
@@ -57,7 +56,9 @@
 
 | Prueba | Componente | Comportamiento que verifica | ¿Cuántos operadores usa? | ¿Normal, frontera o inválida? |
 |---|---|---|---|---|
-| | | | | |
+| test_tokeniza_un_numero_solo() | La función test_tokeniza_un_numero_solo, método de tokenizar(“42”), el objeto [Token(TipoToken.NUMERO, 42, 0)] y el assert que valida. | Este test revisa que el número a tokenizar sea entregado como un solo número entero sin tener problemas al pasar dos dígitos. Esos dos dígitos se deben de leer como un sólo número. | Ninguno. | Normal. |
+
+| test_tokeniza_una_suma() | La función test_tokeniza_una_suma, el assert que valida, el método tokenizar(“3+4”), la lista de tokens con sus valores y posiciones. | El test se encarga de que a la cadena de texto que se le aplique el método tokenizar pase exactamente como una lista de 3 tokens (en este caso) con sus propios valores y posiciones. | 1 (la suma). | Normal. | 
 
 > Llenen la tabla **completa**, con las 13. Es tediosa a propósito: la única
 > forma de saber qué no está cubierto es caracterizar sistemáticamente lo que
