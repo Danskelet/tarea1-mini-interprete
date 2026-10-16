@@ -71,6 +71,8 @@
 | test_precedencia_sin_parentesis() | La función test_precedencia_sin_parentesis, el assert que valida, el método interpretar(..) y el valor 11. | Se encarga de que el método interpretar devuelve el resultado correspondiente de la cadena de texto. Respetando las reglas de que la multiplicación/división se realizan primero y después la suma/resta. | 3: la suma, la multiplicación y el operador de comparación. |
 | test_precedencia_con_parentesis() | La función test_precedencia_con_parentesis, el assert que valida, el método interpretar(..) y el valor 14. | Se encarga de que el método interpretar devuelve el resultado correspondiente de la cadena de texto. Respetando la agrupación que realizan los paréntesis. | 3: la suma, la multiplicación y el operador de comparación. | Frontera. | 
 
+> La función arbol_de(texto) solo es un auxiliar para las siguientes pruebas
+
 > Llenen la tabla **completa**, con las 13. Es tediosa a propósito: la única
 > forma de saber qué no está cubierto es caracterizar sistemáticamente lo que
 > sí. Cuando terminen, léanla como columna, no como renglones, y pregúntense
@@ -79,7 +81,11 @@
 ### 2.2 ¿Qué comportamientos **no** estaban probados?
 
 > Ésta es la pregunta importante de toda la tarea. Tómense su tiempo.
-
+- La división entre 0.
+- La prescedencia de operadores utilizando la división y la resta.
+- Paréntesis vacíos.
+- Operaciones entre números negativos
+- La asociatividad en sus distintas formas
 ---
 
 ## 3. Las pruebas que agregaron
