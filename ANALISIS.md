@@ -35,14 +35,14 @@
 | AST | 
 
 ```text
-+
-|-- 3
-`-- *
-    |-- 4
-    `-- 2 
+*
+|-- +
+|   |-- 3
+|   `-- 4
+`-- 2
+
 ```
-|
-| resultado | 11 |
+| resultado | 14 |
 
 > Para el renglón del AST, dibújenlo **primero ustedes** y después comprueben
 > con `python3 interprete.py --arbol "(3 + 4) * 2"`. Si su dibujo y el del
