@@ -84,8 +84,9 @@
 - La división entre 0.
 - La prescedencia de operadores utilizando la división y la resta.
 - Paréntesis vacíos.
-- Operaciones entre números negativos
-- La asociatividad en sus distintas formas
+- Operaciones entre números negativos.
+- La asociatividad en sus distintas formas.
+- Operaciones con números como "003" o "074".
 ---
 
 ## 3. Las pruebas que agregaron
