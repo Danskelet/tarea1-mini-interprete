@@ -98,7 +98,12 @@
 | test_resultado_numero_decimal() | interpretar("3 / 2") | 1.5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
 | test_precedencia_sin_parentesis_con_division_y_multiplicacion() | interpretar("12 / 4 * 2") | 1.5 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
 | test_precedencia_sin_parentesis_con_suma_y_resta() | interpretar("12 - 4 + 5") | 3 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
-|  | | | | |
+| test_doble_parentesis() | interpretar("((3+2))") | 5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_precedencia_con_division() | interpretar("(8-4) / 2") | 2 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_precedencia_sin_parentesis_con_division() | interpretar("8 - 4 / 2") | 6 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_expresion_con_muchos_espacios() | interpretar("3       + 9     *  2") | 21 | Normal. | Cumple con las reglas definidas del modelo del programa.  |
+| test_cero_a_la_izquierda() | interpretar("003 + 0006") | 9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+
 
 ---
 
