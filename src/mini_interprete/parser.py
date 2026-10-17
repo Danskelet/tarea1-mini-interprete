@@ -24,22 +24,28 @@ class Parser:
     def __init__(self, tokens: list):
         self.tokens = tokens
         self.pos = 0
-
+    #Condición en parsear para verificar que no pasen expresiones incompletas, sobretodo en paréntesis
     def parsear(self):
         """Construye el AST de la lista de tokens."""
-        return self._expresion()
+        resultado = self._expresion()
+        if self.pos < len(self.tokens) -1 :
+            raise ErrorDeSintaxis("Sobran caracteres al final", posicion = self.pos)
+        return resultado
 
     def _actual(self):
         """El token en la posicion actual, o None si ya no quedan."""
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
         return None
-
+    #Cambiar el método avanzar para verificar que no se ingrese un operador de manera inváilda
     def _avanzar(self):
         """Consume el token actual y lo regresa."""
-        token = self.tokens[self.pos]
-        self.pos += 1
+        if self.pos >=len(self.tokens):
+            raise ErrorDeSintaxis("Se esperaba un operando", posicion = self.pos)
+        token =self.tokens[self.pos]
+        self.pos +=1
         return token
+        
 
     def _expresion(self):
         izquierda = self._termino()
