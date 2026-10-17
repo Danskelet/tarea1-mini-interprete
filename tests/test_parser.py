@@ -38,3 +38,9 @@ def test_parentesis_vacios():
 def test_operador_incompleto_al_final():
     with pytest.raises(ErrorDeSintaxis):
         arbol_de("4+3 *")
+
+def test_la_division_se_agrupa_antes_que_la_resta():
+    # 20 - 8 / 2 debe agruparse como 20 - (8 / 2).
+    assert arbol_de("20 - 8 / 2") == OperacionBinaria(
+        "-", Numero(20), OperacionBinaria("/", Numero(8), Numero(2))
+    )
