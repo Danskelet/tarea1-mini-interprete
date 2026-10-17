@@ -25,9 +25,16 @@ def test_los_parentesis_cambian_la_agrupacion():
     assert arbol_de("(3 + 4) * 2") == OperacionBinaria(
         "*", OperacionBinaria("+", Numero(3), Numero(4)), Numero(2)
     )
-#Nueva Prueba
+#Nuevas Pruebas
 def test_parentesis_sobrante():
     # (3 + 4) )/ 5 Debe ser un error sintáctico
 
     with pytest.raises(ErrorDeSintaxis):
         arbol_de("(3 + 4) ) / 5")
+def test_parentesis_vacios():
+    #(4 + 3) () / 5 Debe lanzar un error por lo paŕentesis vacíos
+    with pytest.raises(ErrorDeSintaxis):
+        arbol_de("(4 + 3) () / 5")
+def test_operador_incompleto_al_final():
+    with pytest.raises(ErrorDeSintaxis):
+        arbol_de("4+3 *")
