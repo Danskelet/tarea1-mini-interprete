@@ -105,7 +105,8 @@
 | test_cero_a_la_izquierda() | interpretar("003 + 0006") | 9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
 | test_operacion_con_negativos() | interpretar("(0-9) + 8") | -1 | Normal. | Cumple con las reglas definidas del modelo del programa. |
 | test_resultado_negativo() | assert interpretar("0 - 9") | -9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-
+| test_error_division_con_divisor_evaluado_en_cero() | interpretar("12 / (5 - 5)") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una operación que da como resultado un cero que divide otro número no es parte de las reglas pero es algo que se debe tomar en cuenta. |
+| test_error_division_entre_cero() | interpretar("0 / 0") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una división entre dos ceros que no está definida en el modelo. |
 
 ---
 
