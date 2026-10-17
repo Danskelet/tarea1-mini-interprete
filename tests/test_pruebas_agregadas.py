@@ -13,12 +13,12 @@ from mini_interprete.parser import Parser
 from mini_interprete.cli import interpretar
 
 
-
-
 def arbol_de(texto):
     return Parser(tokenizar(texto)).parsear()
+    
 
 """Casos normales"""
+
 def test_resultado_numero_decimal():
     assert interpretar("3 / 2") == 1.5 
     
@@ -48,3 +48,14 @@ def test_operacion_con_negativos():
 
 def test_resultado_negativo():
     assert interpretar("0 - 9") == -9
+
+
+""""Casos frontera""""
+
+def test_error_division_con_divisor_evaluado_en_cero():
+    with pytest.raises(ErrorDeEvaluacion):
+        interpretar("12 / (5 - 5)")
+
+def test_error_division_entre_cero():
+    with pytest.raises(ErrorDeEvaluacion):
+        interpretar("0 / 0")
