@@ -1,9 +1,9 @@
 """Pruebas del parser: de los tokens al AST."""
-
+import pytest
 from mini_interprete.ast import Numero, OperacionBinaria
 from mini_interprete.lexer import tokenizar
 from mini_interprete.parser import Parser
-
+from mini_interprete.errores import ErrorDeSintaxis
 
 def arbol_de(texto):
     return Parser(tokenizar(texto)).parsear()
@@ -25,3 +25,9 @@ def test_los_parentesis_cambian_la_agrupacion():
     assert arbol_de("(3 + 4) * 2") == OperacionBinaria(
         "*", OperacionBinaria("+", Numero(3), Numero(4)), Numero(2)
     )
+#Nueva Prueba
+def test_parentesis_sobrante():
+    # (3 + 4) )/ 5 Debe ser un error sintáctico
+
+    with pytest.raises(ErrorDeSintaxis):
+        arbol_de("(3 + 4) ) / 5")
