@@ -18,9 +18,10 @@ from mini_interprete.cli import interpretar
 def arbol_de(texto):
     return Parser(tokenizar(texto)).parsear()
 
-"""Pruebas normales"""
+"""Casos normales"""
 def test_resultado_numero_decimal():
     assert interpretar("3 / 2") == 1.5 
+    
 def test_precedencia_sin_parentesis_con_division_y_multiplicacion():
     assert interpretar("12 / 4 * 2") == 1.5
 
@@ -41,3 +42,9 @@ def test_expresion_con_muchos_espacios():
 
 def test_cero_a_la_izquierda():
     assert interpretar("003 + 0006") == 9 
+
+def test_operacion_con_negativos():
+    assert interpretar("(0-9) + 8") == -1
+
+def test_resultado_negativo():
+    assert interpretar("0 - 9") == -9
