@@ -107,6 +107,15 @@
 | test_resultado_negativo() | assert interpretar("0 - 9") | -9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
 | test_error_division_con_divisor_evaluado_en_cero() | interpretar("12 / (5 - 5)") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una operación que da como resultado un cero que divide otro número no es parte de las reglas pero es algo que se debe tomar en cuenta. |
 | test_error_division_entre_cero() | interpretar("0 / 0") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una división entre dos ceros que no está definida en el modelo. |
+| test_lista_sin_tokens() | arbol_de("") | pytest.raises(ErrorDeSintaxis) | Frontera. | Una lista sin tokens no se le puede crear un AST. |
+| test_parentesis_incompleto() | arbol_de("(3 + 8") | pytest.raises(ErrorDeSintaxis) | Frontera. | La operación aritmética está bien escrita pero hace falta cerrar el paréntesis. |
+| test_sin_numeros() | arbol_de("+ -") | pytest.raises(ErrorDeSintaxis) | Frontera. | No se puede crear un árbol con solo operandos. |
+| test_caracter_invalido() | arbol_de("2@3") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | Se usan carácteres que no son parte de la sintática del modelo del programa. |
+| test_operacion_con_numero_no_entero() | interpretar("3 + 4.5") | pytest.raises(ErrorDeEvaluacion) | Entrada inválida. | Aunque la semántica pida que sean números enteros, no se levanta ninguna excepción cuando se ponen decimales en la entrada del intérprete. |
+| test_operador_sin_operandos() | interpretar("+") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede evaluar una operación sin números. |
+| test_solo_numeros() | arbol_de("3 2") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST de solo números. |
+| test_parentesis_vacios() | arbol_de("()") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No hay ningún número u operador que se pueda evaluar. |
+| test_operadores_consecutivos() | arbol_de("3 +-4") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST con dos operandores consecutivos. |
 
 ---
 
