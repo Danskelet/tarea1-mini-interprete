@@ -125,6 +125,7 @@
 Que no se tomaban en cuenta distintas entradas inválidas que un usuario puede colocar al usar el intérprete sin saber la semántica declarada en el modelo del código. Al igual que el mismo código original presentaba diferentes señales de mal diseño o inestabilidad, como duplicación o amplificación.
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
+Dejando a un lado que salían commits rojos después de correr las pruebas, se comparó más que nada con las entradas que se pedían en la semántica declarada del modelo original del programa. La mayoría de estos commits son debido a entradas inválidas en el uso del intérprete o en la creación del árbol de análisis sintático. En el modelo original no se tomaron en cuenta casos vacíos (como una lista de tokens vacía para crear un AST o una cadena de texto vacía en el intérprete), los paréntesis no cerrados (regla de la precedencia), operaciones con números no enteros (regla de los números) y operaciones con solo números (regla de la entrada inválida). 
 
 > No basta con "daba mal". Digan contra qué lo están comparando: qué regla,
 > qué línea de la semántica declarada del README.
