@@ -122,6 +122,7 @@
 ## 4. Los defectos
 
 ### 4.1 ¿Qué defecto reveló primero una prueba nueva?
+Que no se tomaban en cuenta distintas entradas inválidas que un usuario puede colocar al usar el intérprete sin saber la semántica declarada en el modelo del código. Al igual que el mismo código original presentaba diferentes señales de mal diseño o inestabilidad, como duplicación o amplificación.
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
 
