@@ -142,8 +142,8 @@ Dejando a un lado que salían commits rojos después de correr las pruebas, se c
 
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
+Como el código original contiene ciertas señales de mal diseño que se fueron revelando a lo largo de las pruebas, llegamos a la conclusión de que corrigiendo gran parte de este muchos de los tests que quedaron en rojo podían pasar sin necesidad de hacer una refactorización demasiado específica para cada uno.
 
----
 
 ## 5. Diseño
 
