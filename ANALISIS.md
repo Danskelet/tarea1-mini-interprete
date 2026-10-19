@@ -159,19 +159,30 @@ Esta repetición dificulta el mantenimiento: si se necesita modificar la lógica
    2.- Amplificación del cambio al agregar un operador.
 
 La información necesaria para admitir un operador está distribuida entre varios componentes. Por ejemplo, para agregar %con la misma precedencia que la multiplicación habría que modificar cuatro archivos:
+
 - tokens.py: definir el nuevo tipo de token.
 - lexer.py: asociar el símbolo % con ese token.
 - parser.py: incluirlo en el grupo de operadores con la precedencia correspondiente.
 - evaluator.py: implementar la operación.
+
 Aunque cada componente tiene una responsabilidad distinta, agregar un operador requiere coordinar cambios en todos ellos. Si se omite alguno, el soporte del operador queda incompleto. Esto representa una limitación de mantenibilidad y extensibilidad.
 
 > Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
 > acoplamiento alto, condicionales repetidos, amplificación del cambio.
 
 ### 5.2 ¿Qué refactorización realizaron, y por qué conserva el comportamiento?
-
 > "Las pruebas siguen pasando" es parte de la respuesta, pero no toda.
 > ¿Por qué el cambio es equivalente?
+
+Se atendió la duplicación identificada en el punto 9 entre los métodos _expresion() y _termino() del archivo parser.py. Se extrajeron sus pasos compartidos a un método auxiliar llamado _operacion_binaria().
+
+El método auxiliar recibe los métodos para leer los operandos y el grupo de operadores permitidos. De esta manera, la lógica compartida queda en un solo lugar y cada método original conserva la selección de los niveles de precedencia.
+
+La refactorización conserva el comportamiento porque realiza las mismas llamadas en el mismo orden, consume los mismos tokens y construye los mismos nodos del árbol. El cambio reorganiza el código sin modificar las reglas de agrupación existentes.
+
+Para verificar el cambio, se agregó previamente una prueba que comprueba que la división se agrupe antes que la resta en 20 - 8 / 2. Las 17 pruebas pasaron tanto antes como después de la refactorización.
+
+El cambio quedó registrado en el commit “Refactoriza el parser para eliminar la duplicacion entre _expresion y _termino”.
 
 ### 5.3 ¿Sería pertinente usar Factory Method, Adapter o ninguno?
 
@@ -180,7 +191,9 @@ Aunque cada componente tiene una responsabilidad distinta, agregar un operador r
 > digan qué tendría que cambiar en el sistema para que empezara a convenir.
 
 Consideramos que ninguno de estos patrones es necesario para los cambios realizados.
+
 Factory Method permite delegar en subclases la elección del objeto concreto que se crea. En este intérprete, el parser construye directamente nodos Numero y OperacionBinaria, y no existe una necesidad actual de variar su creación mediante subclases. Incorporar este patrón añadiría estructura sin resolver la duplicación identificada. Podría ser pertinente si existieran distintas variantes del parser que necesitaran crear diferentes tipos de nodos mediante una interfaz común.
+
 Adapter permite que componentes con interfaces incompatibles trabajen juntos. Actualmente, el lexer entrega los tokens que espera el parser y este construye los nodos que utiliza el evaluador, por lo que no identificamos una incompatibilidad que requiera un adaptador. Podría ser útil si se integrara un lexer externo cuyo formato de tokens fuera distinto del que acepta nuestro parser.
 Para eliminar la duplicación entre _expresion() y _termino() fue suficiente extraer la lógica compartida a _operacion_binaria(). Este método auxiliar no constituye por sí mismo un Factory Method ni un Adapter. Por ello, preferimos mantener una solución sencilla y no incorporar patrones sin una necesidad concreta.
 
