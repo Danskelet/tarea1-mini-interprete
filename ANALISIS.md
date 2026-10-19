@@ -163,6 +163,12 @@ Dejando a un lado que salían commits rojos después de correr las pruebas, se c
 > digan qué problema concreto resuelve y qué costo tiene. Si dicen que no,
 > digan qué tendría que cambiar en el sistema para que empezara a convenir.
 
+Consideramos que ninguno de estos patrones es necesario para los cambios realizados.
+Factory Method permite delegar en subclases la elección del objeto concreto que se crea. En este intérprete, el parser construye directamente nodos Numero y OperacionBinaria, y no existe una necesidad actual de variar su creación mediante subclases. Incorporar este patrón añadiría estructura sin resolver la duplicación identificada. Podría ser pertinente si existieran distintas variantes del parser que necesitaran crear diferentes tipos de nodos mediante una interfaz común.
+Adapter permite que componentes con interfaces incompatibles trabajen juntos. Actualmente, el lexer entrega los tokens que espera el parser y este construye los nodos que utiliza el evaluador, por lo que no identificamos una incompatibilidad que requiera un adaptador. Podría ser útil si se integrara un lexer externo cuyo formato de tokens fuera distinto del que acepta nuestro parser.
+Para eliminar la duplicación entre _expresion() y _termino() fue suficiente extraer la lógica compartida a _operacion_binaria(). Este método auxiliar no constituye por sí mismo un Factory Method ni un Adapter. Por ello, preferimos mantener una solución sencilla y no incorporar patrones sin una necesidad concreta.
+
+
 ### 5.4 ¿Qué parte del sistema sería más difícil de modificar si se agregara un operador nuevo?
 
 > Por ejemplo `%`. ¿Cuántos archivos hay que tocar? ¿Por qué?
