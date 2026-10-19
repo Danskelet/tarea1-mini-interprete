@@ -142,12 +142,28 @@ Dejando a un lado que salían commits rojos después de correr las pruebas, se c
 
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
-Como el código original contiene ciertas señales de mal diseño que se fueron revelando a lo largo de las pruebas, llegamos a la conclusión de que corrigiendo gran parte de este muchos de los tests que quedaron en rojo podían pasar sin necesidad de hacer una refactorización demasiado específica para cada uno.
+
+Como el código original contiene ciertas señales de mal diseño que se fueron revelando a lo largo de las pruebas, llegamos a la conclusión de que corrigiendo gran parte de este muchos de los tests que quedaron en rojo podían pasar sin necesidad de hacer una refactorización demasiado específica para cada uno. También se tomó en cuenta aquellas pruebas que sí pasaron desde el principio para no tener otro error o problema dentro de ellas al ejecutarlas.
 
 
 ## 5. Diseño
 
 ### 5.1 ¿Qué duplicación o señal de mal diseño encontraron?
+   
+   1.- Duplicacion del codigo en en el parser.
+   
+En el archivo parser.py, los métodos _expresion() y _termino() tienen una estructura muy similar. Ambos obtienen el operando izquierdo, revisan el token actual, verifican si corresponde a un operador permitido y construyen un nodo OperacionBinaria. Las diferencias están en el grupo de operadores que aceptan y en los métodos que llaman para obtener los operandos.
+
+Esta repetición dificulta el mantenimiento: si se necesita modificar la lógica compartida, habría que revisar ambos métodos. Existe el riesgo de cambiar uno y olvidar el otro, causando comportamientos inconsistentes.
+
+   2.- Amplificación del cambio al agregar un operador.
+
+La información necesaria para admitir un operador está distribuida entre varios componentes. Por ejemplo, para agregar %con la misma precedencia que la multiplicación habría que modificar cuatro archivos:
+- tokens.py: definir el nuevo tipo de token.
+- lexer.py: asociar el símbolo % con ese token.
+- parser.py: incluirlo en el grupo de operadores con la precedencia correspondiente.
+- evaluator.py: implementar la operación.
+Aunque cada componente tiene una responsabilidad distinta, agregar un operador requiere coordinar cambios en todos ellos. Si se omite alguno, el soporte del operador queda incompleto. Esto representa una limitación de mantenibilidad y extensibilidad.
 
 > Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
 > acoplamiento alto, condicionales repetidos, amplificación del cambio.
