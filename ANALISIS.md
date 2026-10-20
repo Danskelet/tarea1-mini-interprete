@@ -84,8 +84,9 @@
 - La división entre 0.
 - La prescedencia de operadores utilizando la división y la resta.
 - Paréntesis vacíos.
-- Operaciones entre números negativos
-- La asociatividad en sus distintas formas
+- Operaciones entre números negativos.
+- La asociatividad en sus distintas formas.
+- Operaciones con números como "003" o "074".
 ---
 
 ## 3. Las pruebas que agregaron
@@ -94,15 +95,37 @@
 
 | Prueba (archivo::nombre) | Entrada | Esperado | Categoría | ¿Por qué esa categoría? |
 |---|---|---|---|---|
-| | | | | |
+| test_resultado_numero_decimal() | interpretar("3 / 2") | 1.5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_precedencia_sin_parentesis_con_division_y_multiplicacion() | interpretar("12 / 4 * 2") | 1.5 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
+| test_precedencia_sin_parentesis_con_suma_y_resta() | interpretar("12 - 4 + 5") | 3 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
+| test_doble_parentesis() | interpretar("((3+2))") | 5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_precedencia_con_division() | interpretar("(8-4) / 2") | 2 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_precedencia_sin_parentesis_con_division() | interpretar("8 - 4 / 2") | 6 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_expresion_con_muchos_espacios() | interpretar("3       + 9     *  2") | 21 | Normal. | Cumple con las reglas definidas del modelo del programa.  |
+| test_cero_a_la_izquierda() | interpretar("003 + 0006") | 9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_operacion_con_negativos() | interpretar("(0-9) + 8") | -1 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_resultado_negativo() | assert interpretar("0 - 9") | -9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
+| test_error_division_con_divisor_evaluado_en_cero() | interpretar("12 / (5 - 5)") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una operación que da como resultado un cero que divide otro número no es parte de las reglas pero es algo que se debe tomar en cuenta. |
+| test_error_division_entre_cero() | interpretar("0 / 0") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una división entre dos ceros que no está definida en el modelo. |
+| test_lista_sin_tokens() | arbol_de("") | pytest.raises(ErrorDeSintaxis) | Frontera. | Una lista sin tokens no se le puede crear un AST. |
+| test_parentesis_incompleto() | arbol_de("(3 + 8") | pytest.raises(ErrorDeSintaxis) | Frontera. | La operación aritmética está bien escrita pero hace falta cerrar el paréntesis. |
+| test_sin_numeros() | arbol_de("+ -") | pytest.raises(ErrorDeSintaxis) | Frontera. | No se puede crear un árbol con solo operandos. |
+| test_caracter_invalido() | arbol_de("2@3") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | Se usan carácteres que no son parte de la sintática del modelo del programa. |
+| test_operacion_con_numero_no_entero() | interpretar("3 + 4.5") | pytest.raises(ErrorDeEvaluacion) | Entrada inválida. | Aunque la semántica pida que sean números enteros, no se levanta ninguna excepción cuando se ponen decimales en la entrada del intérprete. |
+| test_operador_sin_operandos() | interpretar("+") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede evaluar una operación sin números. |
+| test_solo_numeros() | arbol_de("3 2") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST de solo números. |
+| test_parentesis_vacios() | arbol_de("()") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No hay ningún número u operador que se pueda evaluar. |
+| test_operadores_consecutivos() | arbol_de("3 +-4") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST con dos operandores consecutivos. |
 
 ---
 
 ## 4. Los defectos
 
 ### 4.1 ¿Qué defecto reveló primero una prueba nueva?
+Que no se tomaban en cuenta distintas entradas inválidas que un usuario puede colocar al usar el intérprete sin saber la semántica declarada en el modelo del código. Al igual que el mismo código original presentaba diferentes señales de mal diseño o inestabilidad, como duplicación o amplificación.
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
+Dejando a un lado que salían commits rojos después de correr las pruebas, se comparó más que nada con las entradas que se pedían en la semántica declarada del modelo original del programa. La mayoría de estos commits son debido a entradas inválidas en el uso del intérprete o en la creación del árbol de análisis sintático. En el modelo original no se tomaron en cuenta casos vacíos (como una lista de tokens vacía para crear un AST o una cadena de texto vacía en el intérprete), los paréntesis no cerrados (regla de la precedencia), operaciones con números no enteros (regla de los números) y operaciones con solo números (regla de la entrada inválida). 
 
 > No basta con "daba mal". Digan contra qué lo están comparando: qué regla,
 > qué línea de la semántica declarada del README.
@@ -111,23 +134,55 @@
 
 | Defecto | Entrada que lo revela | Daba | Debería dar | Commit rojo | Commit verde |
 |---|---|---|---|---|---|
-| | | | | | |
+| El programa levanta un error de sintaxis al tratar de construir un árbol con una lista de tokens vacía. | arbol_de("") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasa una expresión aritmética con un paréntesis sin cerrar. | arbol_de("(3 + 8") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasa una expresión sin un operando válido. | arbol_de("2@3") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de evaluación al tratar de hacer una operación con un número que no cumple con la semántica del modelo del programa. | interpretar("3 + 4.5") | Failed: DID NOT RAISE ErrorDeEvaluacion | Lanzar un ErrorDeEvaluacion | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasan solo números al intérprete. | arbol_de("3 2") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
 
----
+Como el código original contiene ciertas señales de mal diseño que se fueron revelando a lo largo de las pruebas, llegamos a la conclusión de que corrigiendo gran parte de este muchos de los tests que quedaron en rojo podían pasar sin necesidad de hacer una refactorización demasiado específica para cada uno. También se tomó en cuenta aquellas pruebas que sí pasaron desde el principio para no tener otro error o problema dentro de ellas al ejecutarlas.
+
 
 ## 5. Diseño
 
 ### 5.1 ¿Qué duplicación o señal de mal diseño encontraron?
+   
+   1.- Duplicacion del codigo en en el parser.
+   
+En el archivo parser.py, los métodos _expresion() y _termino() tienen una estructura muy similar. Ambos obtienen el operando izquierdo, revisan el token actual, verifican si corresponde a un operador permitido y construyen un nodo OperacionBinaria. Las diferencias están en el grupo de operadores que aceptan y en los métodos que llaman para obtener los operandos.
+
+Esta repetición dificulta el mantenimiento: si se necesita modificar la lógica compartida, habría que revisar ambos métodos. Existe el riesgo de cambiar uno y olvidar el otro, causando comportamientos inconsistentes.
+
+   2.- Amplificación del cambio al agregar un operador.
+
+La información necesaria para admitir un operador está distribuida entre varios componentes. Por ejemplo, para agregar %con la misma precedencia que la multiplicación habría que modificar cuatro archivos:
+
+- tokens.py: definir el nuevo tipo de token.
+- lexer.py: asociar el símbolo % con ese token.
+- parser.py: incluirlo en el grupo de operadores con la precedencia correspondiente.
+- evaluator.py: implementar la operación.
+
+Aunque cada componente tiene una responsabilidad distinta, agregar un operador requiere coordinar cambios en todos ellos. Si se omite alguno, el soporte del operador queda incompleto. Esto representa una limitación de mantenibilidad y extensibilidad.
 
 > Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
 > acoplamiento alto, condicionales repetidos, amplificación del cambio.
 
 ### 5.2 ¿Qué refactorización realizaron, y por qué conserva el comportamiento?
-
 > "Las pruebas siguen pasando" es parte de la respuesta, pero no toda.
 > ¿Por qué el cambio es equivalente?
+
+Se atendió la duplicación identificada en el punto 9 entre los métodos _expresion() y _termino() del archivo parser.py. Se extrajeron sus pasos compartidos a un método auxiliar llamado _operacion_binaria().
+
+El método auxiliar recibe los métodos para leer los operandos y el grupo de operadores permitidos. De esta manera, la lógica compartida queda en un solo lugar y cada método original conserva la selección de los niveles de precedencia.
+
+La refactorización conserva el comportamiento porque realiza las mismas llamadas en el mismo orden, consume los mismos tokens y construye los mismos nodos del árbol. El cambio reorganiza el código sin modificar las reglas de agrupación existentes.
+
+Para verificar el cambio, se agregó previamente una prueba que comprueba que la división se agrupe antes que la resta en 20 - 8 / 2. Las 17 pruebas pasaron tanto antes como después de la refactorización.
+
+El cambio quedó registrado en el commit “Refactoriza el parser para eliminar la duplicacion entre _expresion y _termino”.
 
 ### 5.3 ¿Sería pertinente usar Factory Method, Adapter o ninguno?
 
@@ -135,9 +190,21 @@
 > digan qué problema concreto resuelve y qué costo tiene. Si dicen que no,
 > digan qué tendría que cambiar en el sistema para que empezara a convenir.
 
+Consideramos que ninguno de estos patrones es necesario para los cambios realizados.
+
+Factory Method permite delegar en subclases la elección del objeto concreto que se crea. En este intérprete, el parser construye directamente nodos Numero y OperacionBinaria, y no existe una necesidad actual de variar su creación mediante subclases. Incorporar este patrón añadiría estructura sin resolver la duplicación identificada. Podría ser pertinente si existieran distintas variantes del parser que necesitaran crear diferentes tipos de nodos mediante una interfaz común.
+
+Adapter permite que componentes con interfaces incompatibles trabajen juntos. Actualmente, el lexer entrega los tokens que espera el parser y este construye los nodos que utiliza el evaluador, por lo que no identificamos una incompatibilidad que requiera un adaptador. Podría ser útil si se integrara un lexer externo cuyo formato de tokens fuera distinto del que acepta nuestro parser.
+
+Para eliminar la duplicación entre _expresion() y _termino() fue suficiente extraer la lógica compartida a _operacion_binaria(). Este método auxiliar no constituye por sí mismo un Factory Method ni un Adapter. Por ello, preferimos mantener una solución sencilla y no incorporar patrones sin una necesidad concreta.
+
+
 ### 5.4 ¿Qué parte del sistema sería más difícil de modificar si se agregara un operador nuevo?
 
 > Por ejemplo `%`. ¿Cuántos archivos hay que tocar? ¿Por qué?
+
+Creemos que si se llega a definir un operador nuevo, basta con solo modificar la semántica del modelo del programa definida en el README. El archivo más relevante a tocar sería el de la clase de los tokens para agregarlo como token nuevo y que el lexer, parser, AST y el evaluator lo puedan reconocer como parte de la semántica con la que se maneja el programa. No es necesario modificar las siguientes partes ya que estas solo se encargan de analizar, construir y evaluar la expresión aritmética que contiene los tokens válidos, entonces este nuevo operador ya solo sería un nuevo token válido.
+
 
 ---
 
