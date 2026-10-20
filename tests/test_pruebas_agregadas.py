@@ -27,10 +27,10 @@ def test_resultado_numero_decimal():
     assert interpretar("3 / 2") == 1.5
  
 def test_precedencia_sin_parentesis_con_division_y_multiplicacion():
-    assert interpretar("12 / 4 * 2") == 1.5
+    assert interpretar("12 / 4 * 2") == 6
 
 def test_precedencia_sin_parentesis_con_suma_y_resta():
-    assert interpretar("12 - 4 + 5") == 3
+    assert interpretar("12 - 4 + 5") == 13
 
 def test_doble_parentesis():
     assert interpretar("((3+2))") == 5
@@ -84,7 +84,7 @@ def test_caracter_invalido():
         arbol_de("2@3")
 
 def test_operacion_con_numero_no_entero():
-    with pytest.raises(ErrorDeEvaluacion):
+    with pytest.raises(ErrorDeSintaxis):
         interpretar("3 + 4.5")
 
 def test_operador_sin_operandos():
