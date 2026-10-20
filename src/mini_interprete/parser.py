@@ -26,10 +26,13 @@ class Parser:
         self.pos = 0
     #Condición en parsear para verificar que no pasen expresiones incompletas, sobretodo en paréntesis
     def parsear(self):
-        """Construye el AST de la lista de tokens."""
+        """Construye el AST y verifica que no sobren tokens."""
         resultado = self._expresion()
-        if self.pos < len(self.tokens) -1 :
-            raise ErrorDeSintaxis("Sobran caracteres al final", posicion = self.pos)
+        sobrante = self._actual()
+        if sobrante is not None:
+            raise ErrorDeSintaxis(
+                "sobran tokens al final", sobrante.posicion
+            )
         return resultado
 
     def _actual(self):
