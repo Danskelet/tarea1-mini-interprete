@@ -134,11 +134,11 @@ Dejando a un lado que salían commits rojos después de correr las pruebas, se c
 
 | Defecto | Entrada que lo revela | Daba | Debería dar | Commit rojo | Commit verde |
 |---|---|---|---|---|---|
-| El programa levanta un error de sintaxis al tratar de construir un árbol con una lista de tokens vacía. | arbol_de("") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | | |
-| El programa no levanta un error de sintaxis cuando se pasa una expresión aritmética con un paréntesis sin cerrar. | arbol_de("(3 + 8") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | | |
-| El programa no levanta un error de sintaxis cuando se pasa una expresión sin un operando válido. | arbol_de("2@3") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | | |
-| El programa no levanta un error de evaluación al tratar de hacer una operación con un número que no cumple con la semántica del modelo del programa. | interpretar("3 + 4.5") | Failed: DID NOT RAISE ErrorDeEvaluacion | Lanzar un ErrorDeEvaluacion | | |
-| El programa no levanta un error de sintaxis cuando se pasan solo números al intérprete. | arbol_de("3 2") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | | |
+| El programa levanta un error de sintaxis al tratar de construir un árbol con una lista de tokens vacía. | arbol_de("") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasa una expresión aritmética con un paréntesis sin cerrar. | arbol_de("(3 + 8") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasa una expresión sin un operando válido. | arbol_de("2@3") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de evaluación al tratar de hacer una operación con un número que no cumple con la semántica del modelo del programa. | interpretar("3 + 4.5") | Failed: DID NOT RAISE ErrorDeEvaluacion | Lanzar un ErrorDeEvaluacion | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| El programa no levanta un error de sintaxis cuando se pasan solo números al intérprete. | arbol_de("3 2") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
 
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
