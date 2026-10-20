@@ -26,10 +26,13 @@ class Parser:
         self.pos = 0
     #Condición en parsear para verificar que no pasen expresiones incompletas, sobretodo en paréntesis
     def parsear(self):
-        """Construye el AST de la lista de tokens."""
+        """Construye el AST y verifica que no sobren tokens."""
         resultado = self._expresion()
-        if self.pos < len(self.tokens) -1 :
-            raise ErrorDeSintaxis("Sobran caracteres al final", posicion = self.pos)
+        sobrante = self._actual()
+        if sobrante is not None:
+            raise ErrorDeSintaxis(
+                "sobran tokens al final", sobrante.posicion
+            )
         return resultado
 
     def _actual(self):
@@ -49,24 +52,21 @@ class Parser:
 
     def _expresion(self):
         return self._operacion_binaria(
-            self._termino, OPERADORES_SUMA, self._expresion
-        )
+            self._termino, OPERADORES_SUMA)
 
     def _termino(self):
         return self._operacion_binaria(
-            self._factor, OPERADORES_PRODUCTO, self._termino
-        )
+            self._factor, OPERADORES_PRODUCTO)
 
-    def _operacion_binaria(self, leer_izquierda, operadores, leer_derecha):
+    def _operacion_binaria(self, leer_operando, operadores):
         """Construye una operacion del grupo indicado si hay un operador."""
-        izquierda = leer_izquierda()
+        izquierda = leer_operando()
         actual = self._actual()
-
-        if actual is not None and actual.tipo in operadores:
+        while actual is not None and actual.tipo in operadores:
             operador = self._avanzar()
-            derecha = leer_derecha()
-            return OperacionBinaria(operador.valor, izquierda, derecha)
-
+            derecha = leer_operando()
+            izquierda = OperacionBinaria(operador.valor, izquierda, derecha)
+            actual = self._actual()
         return izquierda
 
     def _factor(self):
