@@ -7,7 +7,7 @@
 
 - Arteaga Sánchez Danhé Mahetsi
 - Sánchez Segura Luis Yamil Antonio
-- Sosa Aranda Miguel 
+- Sosa Aranda Miguel
 
 ---
 
@@ -84,6 +84,9 @@ entre un análisis propio previo y otro posterior de la herramienta.
 - Se comparó el código anterior y posterior para verificar que se conservaran
   las llamadas, su orden, los operadores admitidos y la construcción del árbol.
 - El commit `7e1cde7` mostró una comprobación aprobada en GitHub.
+- Después de integrar las pruebas y correcciones de `main` y adaptar la
+  refactorización, se ejecutó la suite completa en `yamil-d`:
+  **38 pruebas aprobadas**.
 
 Estos resultados respaldan los cambios incorporados, pero no demuestran
 que el intérprete esté libre de otros defectos.
@@ -115,6 +118,6 @@ independientemente de las herramientas que hayamos utilizado.
 
 | Nombre | Número de cuenta |
 |---|---|
-| Arteaga Sánchez Danhé Mahetsi| 323122748 |
+| Arteaga Sánchez Danhé Mahetsi | 323122748 |
 | Sánchez Segura Luis Yamil Antonio | 323028774 |
 | Sosa Aranda Miguel | 323174826 |
