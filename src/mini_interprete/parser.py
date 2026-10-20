@@ -51,21 +51,20 @@ class Parser:
         
 
     def _expresion(self):
-        izquierda = self._termino()
-        actual = self._actual()
-        while actual is not None and actual.tipo in OPERADORES_SUMA:
-            operador = self._avanzar()
-            derecha = self._termino()
-            izquierda = OperacionBinaria(operador.valor, izquierda, derecha)
-            actual = self._actual()
-        return izquierda
-    
+        return self._operacion_binaria(
+            self._termino, OPERADORES_SUMA)
+
     def _termino(self):
-        izquierda = self._factor()
+        return self._operacion_binaria(
+            self._factor, OPERADORES_PRODUCTO)
+
+    def _operacion_binaria(self, leer_operando, operadores):
+        """Construye una operacion del grupo indicado si hay un operador."""
+        izquierda = leer_operando()
         actual = self._actual()
-        while actual is not None and actual.tipo in OPERADORES_PRODUCTO:
+        while actual is not None and actual.tipo in operadores:
             operador = self._avanzar()
-            derecha = self._factor()
+            derecha = leer_operando()
             izquierda = OperacionBinaria(operador.valor, izquierda, derecha)
             actual = self._actual()
         return izquierda

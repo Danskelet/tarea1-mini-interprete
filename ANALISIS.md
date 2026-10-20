@@ -1,15 +1,13 @@
 # Análisis — Tarea 1
 
 **Integrantes:**
+
 1. Arteaga Sánchez Danhé Mahetsi
 2. Sánchez Segura Luis Yamil Antonio
 3. Sosa Aranda Miguel
 
-**Fork:**
-**Rama:**
-
-> Contesten en este archivo. Respuestas breves y concretas: se califica que
-> hayan entendido, no la extensión.
+**Fork:** https://github.com/Danskelet/tarea1-mini-interprete
+**Rama de entrega:** `main`, una vez revisado y fusionado el pull request correspondiente.
 
 ---
 
@@ -19,20 +17,23 @@
 
 | Componente | Qué recibe | Qué entrega | De qué es responsable |
 |---|---|---|---|
-| `lexer` | Cadena de texto con la expresión aritmética. | Una lista de objetos tipo Token que tienen su nombre, valor y posición dentro de la expresión. | Se encarga de hacer el análisis sintático, reconociendo cada token como un número, operador binario o hasta un paréntesis. |
-| `parser` | Lista de tokens generada por el lexer. | Crea la estructura para el AST. | Se encarga de hacer el análisis sintático para revisar que los tokens recibidos respeten las reglas de la expresión aritmética, así como la prescedencia de operaciones. |
-| `ast` | Recibe la construcción del árbol hecha por el parser. | Entrega una cadena de texto con la reppresentación del árbol AST de la expresión aritmética. | Crea nodos con los números y las operaciones binarias, leyende de izquierda a derecha la expresión aritmética para representarla correctamente. |
-| `evaluator` | Recibe un nodo del AST. | El valor resultante del nodo. | Se encarga de que la semántica sea la correcta y si es así resuelve las operaciones de cada nodo para al final regresar el resultado numérico de la expresión aritmética. |
+| `lexer` | Texto de una expresión. | Tokens con tipo, valor y posición. | Realiza el análisis léxico: reconoce números, operadores y paréntesis, ignora espacios y rechaza caracteres inválidos. |
+| `parser` | Lista de tokens. | Árbol de sintaxis abstracta (AST). | Verifica la estructura de la expresión y construye el árbol respetando precedencia, asociatividad y paréntesis. |
+| `ast` | Valores y operandos para crear nodos; un árbol para representarlo. | Nodos `Numero` y `OperacionBinaria`, y una representación textual del árbol. | Define los nodos y permite visualizar el árbol construido por el parser. |
+| `evaluator` | Un nodo del AST. | Resultado numérico o error de evaluación. | Recorre el árbol, calcula las operaciones y controla errores como la división entre cero. |
 
 ### 1.2 ¿Qué recorrido sigue una expresión desde que se recibe como texto hasta que produce un resultado?
 
-> Usen `(3 + 4) * 2` como ejemplo y muestren cómo se ve entre etapa y etapa.
-
-| Etapa | Cómo se ve `(3 + 4) * 2` aquí |
+| Etapa | Representación de `(3 + 4) * 2` |
 |---|---|
-| texto | `"(3 + 4) * 2"` |
-| tokens | [PAR_IZQ, NUMERO(3), MAS, NUMERO(4), PAR_DER, POR, NUMERO(2)] |
-| AST | 
+| Texto | `"(3 + 4) * 2"` |
+| Tokens, abreviados | `PAR_IZQ, NUMERO(3), MAS, NUMERO(4), PAR_DER, POR, NUMERO(2)` |
+| AST | `OperacionBinaria("*", OperacionBinaria("+", Numero(3), Numero(4)), Numero(2))` |
+| Resultado | `14` |
+
+Los objetos `Token` también conservan el valor y la posición dentro del texto.
+El árbol tiene esta forma:
+
 ```text
 *
 |-- +
@@ -40,13 +41,10 @@
 |   `-- 4
 `-- 2
 ```
-|
-| resultado | 14 |
 
-> Para el renglón del AST, dibújenlo **primero ustedes** y después comprueben
-> con `python3 interprete.py --arbol "(3 + 4) * 2"`. Si su dibujo y el del
-> programa no coinciden, uno de los dos está mal, y averiguar cuál es
-> justamente el trabajo.
+El lexer transforma el texto en tokens. El parser construye el árbol y los
+paréntesis hacen que la suma sea el operando izquierdo de la multiplicación.
+El evaluador calcula primero `3 + 4 = 7` y después `7 * 2 = 14`.
 
 ---
 
@@ -54,111 +52,188 @@
 
 ### 2.1 ¿Qué pruebas venían incluidas?
 
+Se cuentan los operadores aritméticos de la expresión de entrada, no el
+`==` del `assert`. Los paréntesis delimitan agrupaciones y no se cuentan
+como operadores aritméticos.
+
 | Prueba | Componente | Comportamiento que verifica | ¿Cuántos operadores usa? | ¿Normal, frontera o inválida? |
 |---|---|---|---|---|
-| test_tokeniza_un_numero_solo() | La función test_tokeniza_un_numero_solo, método de tokenizar(“42”), el objeto [Token(TipoToken.NUMERO, 42, 0)] y el assert que valida. | Este test revisa que el número a tokenizar sea entregado como un solo número entero sin tener problemas al pasar dos dígitos. Esos dos dígitos se deben de leer como un sólo número. | 1: operador de comparación. | Normal. |
-| test_tokeniza_una_suma() | La función test_tokeniza_una_suma, el assert que valida, el método tokenizar(“3+4”), la lista de tokens con sus valores y posiciones. | El test se encarga de que a la cadena de texto que se le aplique el método tokenizar pase exactamente como una lista de 3 tokens (en este caso) con sus propios valores y posiciones. | 2: suma y operador de comparación. | Normal. | 
-| test_los_espacios_no_producen_tokens() | La función test_los_espacios_no_producen_tokens, el assert que valida, la función len(..) con la función tokenizar y su cadena de texto y el número 3. | Este test checa que los espacios dentro de la cadena de texto sean ignorados por el lexer y que solo se cuenten los dígitos que son números u operaciones binarias. Regresa un número entero que debe coincidir con la longitud de los tokens. | 2: suma y operador de comparación. | Normal. |
-| test_tokeniza_parentesis() | La función test_tokeniza_parentesis, tipos que es una lista de tokens la cual se itera de acuerdo a la cadena de texto que tokenizar recibe, el assert que valida que tipos sea igual a la lista de tokens que el lexer devolvió del string en su parámetro. | Se encarga de checar que la variable tipos que inicialmente era una lista la cual se itera en base a lo que el lexer tokenize (en este caso un string con paréntesis) sea igual a una lista de tokens clasificados principalmente como paréntesis y número. | 2: los operadores de comparación. | Normal. |
-| arbol_de(texto) | La función arbol_de con el parámetro texto que es una cadena de carácteres, el objeto de Parser que utiliza el método parsear del texto tokenizado. |  Crea un nuevo árbol en base del Parser para realizar las siguientes pruebas. | Ninguno. | Normal. |
-| test_construye_el_arbol_de_una_suma() | La función test_construye_el_arbol_de_una_suma, el assert que valida, la función arbol_de(..) que construye un árbol de acuerdo al texto dado, el objeto OperacionBinaria que devuelve el resultado directo de los valores dados. | Se encarga de checar que el árbol construido siga la misma forma que la operación binaria dada. | 3: la suma y la operación de comparación. | Normal. |
-| test_la_multiplicacion_se_agrupa_antes_que_la_suma() | La función test_la_multiplicacion_se_agrupa_antes_que_la_suma, el assert que valida, la función arbol_de(..) que crea un árbol de sus parámetros, OperacionBinaria con parámetros de otro objeto de OperacionBinaria, un número y otra operación. | Revisa que el árbol resultante siga la misma forma que la operación binaria, esto siguiendo las reglas de que la multiplicación/división se hace antes que la suma/resta. | 5: las sumas, las multiplicaciones y el operador de comparación. | Normal. |
-| test_los_parentesis_cambian_la_agrupacion() | La función test_los_parentesis_cambian_la_agrupacion, el assert que valida, la función arbol_de(...) que genera un árbol, el objeto OperacionBinaria que recibe la operación, un número y otro objeto OperacionBinaria. | Se encarga de revisar que el árbol generado siga la misma forma que la operación binaria, esto tomando en cuenta que se pasaron paréntesis que agrupan dentro de la cadena de texto. | 5: las sumas, las multiplicaciones y el operador de comparación. | Frontera. |
-| test_suma() | La función test_suma, el assert que valida, el método interpretar(..) y el valor 7. | Se encarga de que el método interpretar devuelva el resultado correspondiente de la cadena de texto. | 2: la suma y el operador de comparación. | Normal. |
-| test_resta() | La función test_resta, el assert que valida, el método interpretar(..) y el valor 7. | Se encarga de que el método interpretar devuelva el resultado correspondiente de la cadena de texto. | 2: La resta y el operador de comparación. | Normal. |
-| test_multiplicacion() | La función test_multiplicacion, el assert que valida, el método interpretar(..) y el valor 42. | Se encarga de que el método interpretar devuelva el resultado correspondiente de la cadena de texto. | 2: La multiplicación y el operador de comparación. | Normal. |
-| test_division() | La función test_division, el assert que valida, el método interpretar(..) y el valor 5. | Se encarga de que el método interpretar devuelva el resultado correspondiente de la cadena de texto. | 2: La división y el operador de comparación. | Normal. |
-| test_precedencia_sin_parentesis() | La función test_precedencia_sin_parentesis, el assert que valida, el método interpretar(..) y el valor 11. | Se encarga de que el método interpretar devuelve el resultado correspondiente de la cadena de texto. Respetando las reglas de que la multiplicación/división se realizan primero y después la suma/resta. | 3: la suma, la multiplicación y el operador de comparación. |
-| test_precedencia_con_parentesis() | La función test_precedencia_con_parentesis, el assert que valida, el método interpretar(..) y el valor 14. | Se encarga de que el método interpretar devuelve el resultado correspondiente de la cadena de texto. Respetando la agrupación que realizan los paréntesis. | 3: la suma, la multiplicación y el operador de comparación. | Frontera. | 
+| `test_tokeniza_un_numero_solo` | Lexer | `42` se reconoce como un único token numérico con su valor y posición. | 0 | Normal |
+| `test_tokeniza_una_suma` | Lexer | `3+4` produce los tokens esperados, con sus valores y posiciones. | 1 | Normal |
+| `test_los_espacios_no_producen_tokens` | Lexer | Una suma con espacios produce tres tokens. | 1 | Normal |
+| `test_tokeniza_parentesis` | Lexer | `(3)` produce los tipos de token de apertura, número y cierre. | 0 | Normal |
+| `test_construye_el_arbol_de_una_suma` | Parser | El árbol de `3 + 4` tiene la estructura esperada. | 1 | Normal |
+| `test_la_multiplicacion_se_agrupa_antes_que_la_suma` | Parser | El árbol de `3 + 4 * 2` representa `3 + (4 * 2)`. | 2 | Normal |
+| `test_los_parentesis_cambian_la_agrupacion` | Parser | El árbol de `(3 + 4) * 2` coloca la suma como operando de la multiplicación. | 2 | Normal |
+| `test_suma` | Interpretación completa, resultado del evaluador | `3 + 4` produce `7`. | 1 | Normal |
+| `test_resta` | Interpretación completa, resultado del evaluador | `10 - 3` produce `7`. | 1 | Normal |
+| `test_multiplicacion` | Interpretación completa, resultado del evaluador | `6 * 7` produce `42`. | 1 | Normal |
+| `test_division` | Interpretación completa, resultado del evaluador | `10 / 2` compara igual a `5`; esta prueba no distingue entre `5` y `5.0`. | 1 | Normal |
+| `test_precedencia_sin_parentesis` | Interpretación completa | `3 + 4 * 2` produce `11`. | 2 | Normal |
+| `test_precedencia_con_parentesis` | Interpretación completa | `(3 + 4) * 2` produce `14`. | 2 | Normal |
 
-> La función arbol_de(texto) solo es un auxiliar para las siguientes pruebas
+Son 13 pruebas. `arbol_de(texto)` es una función auxiliar, no una prueba.
+Las pruebas que llaman a `interpretar()` también recorren el lexer y el
+parser; no prueban el evaluador de manera aislada.
 
-> Llenen la tabla **completa**, con las 13. Es tediosa a propósito: la única
-> forma de saber qué no está cubierto es caracterizar sistemáticamente lo que
-> sí. Cuando terminen, léanla como columna, no como renglones, y pregúntense
-> qué combinación **no aparece nunca**.
+### 2.2 ¿Qué comportamientos no estaban probados?
 
-### 2.2 ¿Qué comportamientos **no** estaban probados?
+- División con resultado no entero y división entre cero, incluido un divisor calculado como cero.
+- Asociatividad de operadores del mismo nivel, especialmente resta y división.
+- Precedencia con resta y división, y paréntesis anidados.
+- Ceros iniciales y resultados negativos obtenidos mediante resta.
+- Entrada vacía, operandos faltantes y paréntesis vacíos o incompletos.
+- Caracteres inválidos, literales decimales y números consecutivos sin operador.
+- Consumo completo de los tokens y precisión de las posiciones de error.
 
-> Ésta es la pregunta importante de toda la tarea. Tómense su tiempo.
-- La división entre 0.
-- La prescedencia de operadores utilizando la división y la resta.
-- Paréntesis vacíos.
-- Operaciones entre números negativos.
-- La asociatividad en sus distintas formas.
-- Operaciones con números como "003" o "074".
+Las pruebas iniciales no incluían casos inválidos ni verificaban errores.
+Aunque había expresiones con dos operadores, ninguna encadenaba dos del
+mismo nivel para distinguir la agrupación por la izquierda de la derecha.
+
 ---
 
 ## 3. Las pruebas que agregaron
 
 ### 3.1 ¿Cuáles son casos normales, cuáles frontera y cuáles inválidos?
 
+La categoría indica el aspecto principal que comprueba cada prueba.
+Una entrada frontera, como la cadena vacía, también puede ser inválida.
+
 | Prueba (archivo::nombre) | Entrada | Esperado | Categoría | ¿Por qué esa categoría? |
 |---|---|---|---|---|
-| test_resultado_numero_decimal() | interpretar("3 / 2") | 1.5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_precedencia_sin_parentesis_con_division_y_multiplicacion() | interpretar("12 / 4 * 2") | 1.5 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
-| test_precedencia_sin_parentesis_con_suma_y_resta() | interpretar("12 - 4 + 5") | 3 | Normal. | Cumple las reglas con las que se definió el modelo del programa. |
-| test_doble_parentesis() | interpretar("((3+2))") | 5 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_precedencia_con_division() | interpretar("(8-4) / 2") | 2 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_precedencia_sin_parentesis_con_division() | interpretar("8 - 4 / 2") | 6 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_expresion_con_muchos_espacios() | interpretar("3       + 9     *  2") | 21 | Normal. | Cumple con las reglas definidas del modelo del programa.  |
-| test_cero_a_la_izquierda() | interpretar("003 + 0006") | 9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_operacion_con_negativos() | interpretar("(0-9) + 8") | -1 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_resultado_negativo() | assert interpretar("0 - 9") | -9 | Normal. | Cumple con las reglas definidas del modelo del programa. |
-| test_error_division_con_divisor_evaluado_en_cero() | interpretar("12 / (5 - 5)") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una operación que da como resultado un cero que divide otro número no es parte de las reglas pero es algo que se debe tomar en cuenta. |
-| test_error_division_entre_cero() | interpretar("0 / 0") | pytest.raises(ErrorDeEvaluacion) | Frontera. | Una división entre dos ceros que no está definida en el modelo. |
-| test_lista_sin_tokens() | arbol_de("") | pytest.raises(ErrorDeSintaxis) | Frontera. | Una lista sin tokens no se le puede crear un AST. |
-| test_parentesis_incompleto() | arbol_de("(3 + 8") | pytest.raises(ErrorDeSintaxis) | Frontera. | La operación aritmética está bien escrita pero hace falta cerrar el paréntesis. |
-| test_sin_numeros() | arbol_de("+ -") | pytest.raises(ErrorDeSintaxis) | Frontera. | No se puede crear un árbol con solo operandos. |
-| test_caracter_invalido() | arbol_de("2@3") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | Se usan carácteres que no son parte de la sintática del modelo del programa. |
-| test_operacion_con_numero_no_entero() | interpretar("3 + 4.5") | pytest.raises(ErrorDeEvaluacion) | Entrada inválida. | Aunque la semántica pida que sean números enteros, no se levanta ninguna excepción cuando se ponen decimales en la entrada del intérprete. |
-| test_operador_sin_operandos() | interpretar("+") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede evaluar una operación sin números. |
-| test_solo_numeros() | arbol_de("3 2") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST de solo números. |
-| test_parentesis_vacios() | arbol_de("()") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No hay ningún número u operador que se pueda evaluar. |
-| test_operadores_consecutivos() | arbol_de("3 +-4") | pytest.raises(ErrorDeSintaxis) | Entrada inválida. | No se puede generar un AST con dos operandores consecutivos. |
+| tests/test_pruebas_agregadas.py::test_resultado_numero_decimal | `3 / 2` | `1.5` | Normal | La división es real y puede producir resultados decimales. |
+| tests/test_pruebas_agregadas.py::test_precedencia_sin_parentesis_con_division_y_multiplicacion | `12 / 4 * 2` | `6` | Normal | Operadores de igual precedencia se agrupan a la izquierda: `(12 / 4) * 2`. |
+| tests/test_pruebas_agregadas.py::test_precedencia_sin_parentesis_con_suma_y_resta | `12 - 4 + 5` | `13` | Normal | Operadores de igual precedencia se agrupan a la izquierda: `(12 - 4) + 5`. |
+| tests/test_pruebas_agregadas.py::test_doble_parentesis | `((3+2))` | `5` | Normal | Comprueba una expresión con paréntesis anidados. |
+| tests/test_pruebas_agregadas.py::test_precedencia_con_division | `(8-4) / 2` | `2.0` | Normal | Los paréntesis hacen que la resta se evalúe antes de la división. |
+| tests/test_pruebas_agregadas.py::test_precedencia_sin_parentesis_con_division | `8 - 4 / 2` | `6.0` | Normal | La división tiene mayor precedencia que la resta. |
+| tests/test_pruebas_agregadas.py::test_expresion_con_muchos_espacios | `3       + 9     *  2` | `21` | Normal | Los espacios deben ignorarse sin alterar la precedencia. |
+| tests/test_pruebas_agregadas.py::test_cero_a_la_izquierda | `003 + 0006` | `9` | Frontera | Comprueba la representación de enteros con ceros iniciales, admitida por el README. |
+| tests/test_pruebas_agregadas.py::test_operacion_con_negativos | `(0-9) + 8` | `-1` | Normal | Utiliza un valor negativo obtenido por resta, sin recurrir al menos unario. |
+| tests/test_pruebas_agregadas.py::test_resultado_negativo | `0 - 9` | `-9` | Normal | Una resta válida puede producir un resultado negativo. |
+| tests/test_pruebas_agregadas.py::test_error_division_con_divisor_evaluado_en_cero | `12 / (5 - 5)` | `ErrorDeEvaluacion` | Frontera | El divisor llega a cero después de evaluar una subexpresión. |
+| tests/test_pruebas_agregadas.py::test_error_division_entre_cero | `0 / 0` | `ErrorDeEvaluacion` | Frontera | Comprueba el valor cero como divisor, prohibido por la semántica declarada. |
+| tests/test_pruebas_agregadas.py::test_lista_sin_tokens | Cadena vacía: `""` | `ErrorDeSintaxis` | Frontera | Comprueba una entrada de longitud cero que no permite construir una expresión. |
+| tests/test_pruebas_agregadas.py::test_parentesis_incompleto | `(3 + 8` | `ErrorDeSintaxis` | Entrada inválida | Falta el paréntesis de cierre. |
+| tests/test_pruebas_agregadas.py::test_sin_numeros | `+ -` | `ErrorDeSintaxis` | Entrada inválida | Hay operadores sin operandos y no se admite menos unario. |
+| tests/test_pruebas_agregadas.py::test_caracter_invalido | `2@3` | `ErrorDeSintaxis` | Entrada inválida | `@` no pertenece a los símbolos admitidos. |
+| tests/test_pruebas_agregadas.py::test_operacion_con_numero_no_entero | `3 + 4.5` | `ErrorDeSintaxis` | Entrada inválida | Los literales admitidos son enteros; el punto decimal es inválido. |
+| tests/test_pruebas_agregadas.py::test_operador_sin_operandos | `+` | `ErrorDeSintaxis` | Entrada inválida | El operador no tiene operandos. |
+| tests/test_pruebas_agregadas.py::test_solo_numeros | `3 2` | `ErrorDeSintaxis` | Entrada inválida | Hay dos números consecutivos sin un operador entre ellos. |
+| tests/test_pruebas_agregadas.py::test_parentesis_vacios | `()` | `ErrorDeSintaxis` | Entrada inválida | Los paréntesis no contienen una expresión. |
+| tests/test_pruebas_agregadas.py::test_operadores_consecutivos | `3 +-4` | `ErrorDeSintaxis` | Entrada inválida | No se admite el menos unario después del operador de suma. |
+| tests/test_parser.py::test_parentesis_sobrante | `(3 + 4) ) / 5` | `ErrorDeSintaxis` | Entrada inválida | Aparece un paréntesis de cierre sin apertura correspondiente. |
+| tests/test_parser.py::test_parentesis_vacios | `(4 + 3) () / 5` | `ErrorDeSintaxis` | Entrada inválida | Tras una expresión completa aparecen paréntesis vacíos sin un operador intermedio. |
+| tests/test_parser.py::test_operador_incompleto_al_final | `4+3 *` | `ErrorDeSintaxis` | Entrada inválida | La entrada termina sin el operando derecho de la multiplicación. |
+| tests/test_parser.py::test_la_division_se_agrupa_antes_que_la_resta | `20 - 8 / 2` | AST equivalente a `20 - (8 / 2)` | Normal | Comprueba la precedencia de división sobre resta mediante la estructura del árbol. |
 
+**Corrección de expectativas.** Se corrigieron tres pruebas conforme a la
+sección 7, “Semántica declarada”, del README:
+
+- **Asociatividad:** `12 / 4 * 2` debe producir `6` y `12 - 4 + 5`
+  debe producir `13`, en lugar de `1.5` y `3`, porque los operadores
+  de igual precedencia se agrupan a la izquierda.
+- **Números y entrada inválida:** `3 + 4.5` debe lanzar `ErrorDeSintaxis`,
+  no `ErrorDeEvaluacion`, porque los literales admitidos son enteros.
+
+Las expectativas se corrigieron en el commit `0c4352e`.
+
+La suite integrada contiene 38 pruebas: 13 originales y 25 adicionales.
+En la última ejecución local, las 38 pasaron.
 ---
 
 ## 4. Los defectos
 
 ### 4.1 ¿Qué defecto reveló primero una prueba nueva?
-Que no se tomaban en cuenta distintas entradas inválidas que un usuario puede colocar al usar el intérprete sin saber la semántica declarada en el modelo del código. Al igual que el mismo código original presentaba diferentes señales de mal diseño o inestabilidad, como duplicación o amplificación.
+
+En el historial de `master`, la primera prueba nueva fallida fue
+`test_parentesis_sobrante`, agregada en `32c7501`. La entrada
+`(3 + 4) ) / 5` debía rechazarse, pero el parser original devolvía el árbol
+de la primera expresión sin comprobar que hubiera consumido todos los tokens.
+
+Después se detectaron accesos fuera de la lista de tokens, caracteres
+inválidos ignorados y agrupación incorrecta de operadores de igual precedencia.
 
 ### 4.2 ¿Por qué el comportamiento observado era incorrecto?
-Dejando a un lado que salían commits rojos después de correr las pruebas, se comparó más que nada con las entradas que se pedían en la semántica declarada del modelo original del programa. La mayoría de estos commits son debido a entradas inválidas en el uso del intérprete o en la creación del árbol de análisis sintático. En el modelo original no se tomaron en cuenta casos vacíos (como una lista de tokens vacía para crear un AST o una cadena de texto vacía en el intérprete), los paréntesis no cerrados (regla de la precedencia), operaciones con números no enteros (regla de los números) y operaciones con solo números (regla de la entrada inválida). 
 
-> No basta con "daba mal". Digan contra qué lo están comparando: qué regla,
-> qué línea de la semántica declarada del README.
+La sección 7 del README establece que:
+
+- Una entrada inválida debe producir `ErrorDeSintaxis`, nunca un error interno de Python.
+- Los literales de entrada son enteros: `3 + 4.5` es inválido, aunque una división pueda producir decimales.
+- Los operadores de igual precedencia se agrupan a la izquierda.
+- Los mensajes de error deben indicar la posición dentro del texto.
+
+Estas reglas justifican rechazar tokens sobrantes y caracteres inválidos,
+controlar las expresiones incompletas y corregir la asociatividad. No se
+consideró incorrecto un comportamiento solamente porque una prueba fallara:
+también se corrigieron expectativas de las pruebas que contradecían el README.
 
 ### 4.3 ¿Qué cambio realizaron?
 
+En la tabla, “Commit verde” identifica un estado comprobado con la suite en
+verde que incluye la solución. Los commits donde se implementó cada cambio
+se detallan después, porque algunos todavía tenían otros fallos pendientes.
+
 | Defecto | Entrada que lo revela | Daba | Debería dar | Commit rojo | Commit verde |
 |---|---|---|---|---|---|
-| El programa levanta un error de sintaxis al tratar de construir un árbol con una lista de tokens vacía. | arbol_de("") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
-| El programa no levanta un error de sintaxis cuando se pasa una expresión aritmética con un paréntesis sin cerrar. | arbol_de("(3 + 8") | IndexError: list index out of range | Lanzar un ErrorDeSintaxis | Casos frontera 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
-| El programa no levanta un error de sintaxis cuando se pasa una expresión sin un operando válido. | arbol_de("2@3") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
-| El programa no levanta un error de evaluación al tratar de hacer una operación con un número que no cumple con la semántica del modelo del programa. | interpretar("3 + 4.5") | Failed: DID NOT RAISE ErrorDeEvaluacion | Lanzar un ErrorDeEvaluacion | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
-| El programa no levanta un error de sintaxis cuando se pasan solo números al intérprete. | arbol_de("3 2") | Failed: DID NOT RAISE ErrorDeSintaxis | Lanzar un ErrorDeSintaxis | Casos frontera 2 y entradas inválidas 1 | Condiciones para solucionar las pruebas agregagadas en el paso 7.  |
+| Aceptaba tokens después de una expresión completa. | `(3 + 4) ) / 5` | No lanzaba la excepción esperada. | `ErrorDeSintaxis`. | `32c7501` | `ef04613`, con las 16 pruebas de ese momento. |
+| Accedía a la lista después de agotar los tokens. | `4+3 *` | `IndexError`. | `ErrorDeSintaxis`. | `db98e5b` | `ef04613`, con las 16 pruebas de ese momento. |
+| Ignoraba caracteres inválidos. | `2@3` | No lanzaba la excepción esperada. | `ErrorDeSintaxis` en la posición de `@`. | `0c4352e` | `ffeb95a` |
+| Omitía el punto decimal. | `3 + 4.5` | No rechazaba la entrada. | `ErrorDeSintaxis`. | `0c4352e`, con la expectativa corregida. | `ffeb95a` |
+| Permitía exactamente un token sobrante. | `3 2` | Aceptaba el primer número e ignoraba el segundo. | `ErrorDeSintaxis` en la posición del segundo número. | `0c4352e` | `ffeb95a` |
+| Agrupaba operadores del mismo nivel por la derecha. | `12 / 4 * 2`; `12 - 4 + 5` | `1.5`; `3`. | `6`; `13`. | `0c4352e` | `ffeb95a` |
 
+Cambios realizados:
+
+- `ef04613`: comprobación de agotamiento en `_avanzar()` y primera validación
+  de tokens sobrantes. Esta última todavía permitía que sobrara un token.
+- `6341eb0`: el lexer lanza `ErrorDeSintaxis` ante caracteres desconocidos,
+  indicando su posición en el texto.
+- `cf711b4`: `parsear()` rechaza cualquier token sobrante y utiliza su
+  atributo `posicion` en el error.
+- `ffeb95a`: los ciclos de `_expresion()` y `_termino()` construyen las
+  operaciones por la izquierda. Las 37 pruebas disponibles pasaron.
+
+Después se integró la prueba adicional de precedencia y se adaptó el método
+auxiliar de `yamil-d` a la lógica corregida. La suite integrada pasó 38 pruebas.
 
 ### 4.4 ¿Cómo saben que la corrección es general y no sólo hace pasar ese ejemplo?
 
-Como el código original contiene ciertas señales de mal diseño que se fueron revelando a lo largo de las pruebas, llegamos a la conclusión de que corrigiendo gran parte de este muchos de los tests que quedaron en rojo podían pasar sin necesidad de hacer una refactorización demasiado específica para cada uno. También se tomó en cuenta aquellas pruebas que sí pasaron desde el principio para no tener otro error o problema dentro de ellas al ejecutarlas.
+Las correcciones aplican reglas generales, sin condiciones específicas para
+los números o las cadenas utilizadas por las pruebas:
 
+- El lexer rechaza los caracteres que no reconoce, no solamente `@`.
+- El parser comprueba cualquier token sobrante, no solamente la entrada `3 2`.
+- La comprobación de agotamiento protege el acceso a la lista en diferentes expresiones incompletas.
+- Los ciclos procesan operadores del mismo nivel y acumulan el árbol por la izquierda.
+
+Se ejecutó la suite completa, que incluye operaciones de ambos niveles,
+paréntesis, entradas inválidas y división entre cero. La última ejecución
+local integrada obtuvo 38 pruebas aprobadas y no reportó problemas con
+`git diff --check`. Esto respalda los cambios, pero no demuestra ausencia
+de todos los errores posibles.
+
+**Limitación pendiente:** al agotarse los tokens, `_avanzar()` todavía usa
+`self.pos`, que es un índice de tokens, como posición del error. Con espacios
+o números de varios dígitos puede no coincidir con la posición en el texto.
+Las pruebas actuales no comprueban esa precisión. No se afirma que todos
+los mensajes de error ya cumplan completamente ese requisito.
+
+---
 
 ## 5. Diseño
 
 ### 5.1 ¿Qué duplicación o señal de mal diseño encontraron?
    
-   1.- Duplicacion del codigo en en el parser.
+**1. Duplicación de código en el parser.**
    
-En el archivo parser.py, los métodos _expresion() y _termino() tienen una estructura muy similar. Ambos obtienen el operando izquierdo, revisan el token actual, verifican si corresponde a un operador permitido y construyen un nodo OperacionBinaria. Las diferencias están en el grupo de operadores que aceptan y en los métodos que llaman para obtener los operandos.
+En el archivo parser.py, los métodos _expresion() y _termino() tenían una estructura muy similar. Ambos obtenían el operando izquierdo, revisaban el token actual, verificaban si corresponde a un operador permitido y construían un nodo `OperacionBinaria`. Las diferencias están en el grupo de operadores que aceptan y en los métodos que llaman para obtener los operandos.
 
 Esta repetición dificulta el mantenimiento: si se necesita modificar la lógica compartida, habría que revisar ambos métodos. Existe el riesgo de cambiar uno y olvidar el otro, causando comportamientos inconsistentes.
 
-   2.- Amplificación del cambio al agregar un operador.
+**2. Amplificación del cambio al agregar un operador.**
 
-La información necesaria para admitir un operador está distribuida entre varios componentes. Por ejemplo, para agregar %con la misma precedencia que la multiplicación habría que modificar cuatro archivos:
+La información necesaria para admitir un operador está distribuida entre varios componentes. Por ejemplo, para agregar `%` con la misma precedencia que la multiplicación habría que modificar cuatro archivos:
 
 - tokens.py: definir el nuevo tipo de token.
 - lexer.py: asociar el símbolo % con ese token.
@@ -167,28 +242,34 @@ La información necesaria para admitir un operador está distribuida entre vario
 
 Aunque cada componente tiene una responsabilidad distinta, agregar un operador requiere coordinar cambios en todos ellos. Si se omite alguno, el soporte del operador queda incompleto. Esto representa una limitación de mantenibilidad y extensibilidad.
 
-> Al menos dos. Usen el vocabulario de clase: duplicación, rigidez,
-> acoplamiento alto, condicionales repetidos, amplificación del cambio.
 
 ### 5.2 ¿Qué refactorización realizaron, y por qué conserva el comportamiento?
-> "Las pruebas siguen pasando" es parte de la respuesta, pero no toda.
-> ¿Por qué el cambio es equivalente?
 
-Se atendió la duplicación identificada en el punto 9 entre los métodos _expresion() y _termino() del archivo parser.py. Se extrajeron sus pasos compartidos a un método auxiliar llamado _operacion_binaria().
+Se extrajo la lógica duplicada de `_expresion()` y `_termino()` a un
+método auxiliar llamado `_operacion_binaria()`.
 
-El método auxiliar recibe los métodos para leer los operandos y el grupo de operadores permitidos. De esta manera, la lógica compartida queda en un solo lugar y cada método original conserva la selección de los niveles de precedencia.
+En la versión final, el auxiliar recibe un método para leer los operandos
+y el grupo de operadores permitido. `_expresion()` utiliza `_termino()`
+para leer sus operandos, mientras que `_termino()` utiliza `_factor()`.
+Así se conservan los niveles de precedencia.
 
-La refactorización conserva el comportamiento porque realiza las mismas llamadas en el mismo orden, consume los mismos tokens y construye los mismos nodos del árbol. El cambio reorganiza el código sin modificar las reglas de agrupación existentes.
+El auxiliar utiliza un ciclo que incorpora cada operación al árbol
+acumulado en el lado izquierdo. Esto conserva la asociatividad por la
+izquierda de la versión corregida: por ejemplo, `12 / 4 * 2` se agrupa
+como `(12 / 4) * 2`.
 
-Para verificar el cambio, se agregó previamente una prueba que comprueba que la división se agrupe antes que la resta en 20 - 8 / 2. Las 17 pruebas pasaron tanto antes como después de la refactorización.
+La corrección de asociatividad y la refactorización son cambios distintos.
+La primera corrigió el comportamiento del programa; la segunda reorganiza
+la lógica corregida sin cambiar el orden de consumo de los tokens ni
+la estructura de los árboles resultantes.
 
-El cambio quedó registrado en el commit “Refactoriza el parser para eliminar la duplicacion entre _expresion y _termino”.
+Inicialmente, las 17 pruebas disponibles pasaron antes y después de la
+primera refactorización. Tras integrar las nuevas pruebas y correcciones
+de `main`, se adaptó el auxiliar a la agrupación por la izquierda.
+La versión integrada pasó las 38 pruebas.
 
 ### 5.3 ¿Sería pertinente usar Factory Method, Adapter o ninguno?
 
-> Justifiquen. **"Ninguno" puede ser la respuesta correcta.** Si dicen que sí,
-> digan qué problema concreto resuelve y qué costo tiene. Si dicen que no,
-> digan qué tendría que cambiar en el sistema para que empezara a convenir.
 
 Consideramos que ninguno de estos patrones es necesario para los cambios realizados.
 
@@ -201,9 +282,23 @@ Para eliminar la duplicación entre _expresion() y _termino() fue suficiente ext
 
 ### 5.4 ¿Qué parte del sistema sería más difícil de modificar si se agregara un operador nuevo?
 
-> Por ejemplo `%`. ¿Cuántos archivos hay que tocar? ¿Por qué?
 
-Creemos que si se llega a definir un operador nuevo, basta con solo modificar la semántica del modelo del programa definida en el README. El archivo más relevante a tocar sería el de la clase de los tokens para agregarlo como token nuevo y que el lexer, parser, AST y el evaluator lo puedan reconocer como parte de la semántica con la que se maneja el programa. No es necesario modificar las siguientes partes ya que estas solo se encargan de analizar, construir y evaluar la expresión aritmética que contiene los tokens válidos, entonces este nuevo operador ya solo sería un nuevo token válido.
+La principal dificultad sería coordinar los cambios entre los componentes.
+Para agregar `%` como operador binario con la misma precedencia que la
+multiplicación, habría que modificar cuatro archivos de implementación:
+
+- `tokens.py`: definir el tipo de token.
+- `lexer.py`: asociar el símbolo `%` con ese tipo en `SIMBOLOS`.
+- `parser.py`: incluir el token en el grupo de precedencia correspondiente.
+- `evaluator.py`: implementar el cálculo y definir los errores aplicables.
+
+El AST ya representa operaciones binarias mediante `OperacionBinaria`,
+por lo que su estructura puede reutilizarse para este operador.
+
+Además, habría que documentar las reglas del nuevo operador en el README
+y agregar pruebas. Cambiar únicamente el README o definir un token no
+hace que los demás componentes reconozcan y evalúen automáticamente
+el operador.
 
 
 ---
